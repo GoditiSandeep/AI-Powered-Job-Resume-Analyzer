@@ -9,7 +9,6 @@ import '../../providers/resume_provider.dart';
 import '../../providers/application_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/app_nav_shell.dart';
-import '../../widgets/custom_button.dart';
 import '../../widgets/job_card.dart';
 import '../../widgets/resume_card.dart';
 import '../../widgets/score_gauge.dart';

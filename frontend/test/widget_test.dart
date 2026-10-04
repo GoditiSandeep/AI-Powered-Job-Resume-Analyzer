@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ai_job_resume_analyzer/widgets/custom_button.dart';
 import 'package:ai_job_resume_analyzer/widgets/score_gauge.dart';
 import 'package:ai_job_resume_analyzer/widgets/skill_chip.dart';
 import 'package:ai_job_resume_analyzer/widgets/empty_state_view.dart';
+import 'package:ai_job_resume_analyzer/core/network/api_client.dart';
+import 'package:ai_job_resume_analyzer/core/storage/secure_storage.dart';
+import 'package:ai_job_resume_analyzer/main.dart';
+import 'package:ai_job_resume_analyzer/providers/auth_provider.dart';
+import 'package:ai_job_resume_analyzer/providers/theme_provider.dart';
 
 void main() {
   group('Frontend Widgets Unit and Component Tests', () {
@@ -85,6 +92,28 @@ void main() {
 
       await tester.tap(find.text('Retry Search'));
       expect(actionTriggered, true);
+    });
+
+    testWidgets('app startup advances from splash when no token is stored', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final storageService = await StorageService.getInstance();
+      final authProvider = AuthProvider(ApiClient(storageService), storageService);
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: authProvider),
+            ChangeNotifierProvider.value(value: ThemeProvider(storageService)),
+          ],
+          child: const JobResumeAnalyzerApp(),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 1700));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Welcome Back'), findsOneWidget);
+      expect(find.text('Job & Resume AI'), findsNothing);
     });
   });
 }

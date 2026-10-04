@@ -9,6 +9,7 @@ import '../models/resume_analysis_model.dart';
 
 class ResumeProvider extends ChangeNotifier {
   final ApiClient apiClient;
+  static const int maxUploadSizeBytes = 10 * 1024 * 1024;
 
   bool _isLoading = false;
   bool _isUploading = false;
@@ -56,6 +57,10 @@ class ResumeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (fileBytes != null && fileBytes.length > maxUploadSizeBytes) {
+        throw Exception('Resume files must be 10 MB or smaller.');
+      }
+
       MultipartFile multipartFile;
       String ext = fileName.split('.').last.toLowerCase();
 
@@ -72,7 +77,7 @@ class ResumeProvider extends ChangeNotifier {
       }
 
       FormData formData = FormData.fromMap({'file': multipartFile});
-      final res = await apiClient.post(ApiConstants.resumeUpload, data: formData);
+        final res = await apiClient.post(ApiConstants.resumeUpload, data: formData);
       final newResume = ResumeModel.fromJson(res.data);
 
       await loadResumes();
@@ -95,7 +100,7 @@ class ResumeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final res = await apiClient.get('${ApiConstants.resumes}/$resumeId/analysis');
+        final res = await apiClient.get('${ApiConstants.resumes}/$resumeId/analysis');
       _currentAnalysis = ResumeAnalysisModel.fromJson(res.data);
     } catch (e) {
       _errorMessage = e.toString();

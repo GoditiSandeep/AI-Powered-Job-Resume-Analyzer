@@ -102,7 +102,7 @@ class ResumeCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(Icons.auto_awesome, size: 13, color: AppColors.primary),
+                          const Icon(Icons.auto_awesome, size: 13, color: AppColors.primary),
                           const SizedBox(width: 4),
                           Text(
                             'ATS Match Score: ${atsScore.toInt()}%',

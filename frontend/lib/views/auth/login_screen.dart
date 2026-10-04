@@ -160,15 +160,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 8,
                         children: [
                           ActionChip(
                             avatar: const Icon(Icons.admin_panel_settings, size: 16, color: AppColors.primary),
                             label: const Text('Admin', style: TextStyle(fontSize: 12)),
                             onPressed: () => _fillCredentials('admin@analyzer.local', 'Admin@Secure2026'),
                           ),
-                          const SizedBox(width: 8),
                           ActionChip(
                             avatar: const Icon(Icons.person, size: 16, color: AppColors.secondary),
                             label: const Text('User Demo', style: TextStyle(fontSize: 12)),
@@ -179,8 +179,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
 
                       // Register link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             "Don't have an account?",

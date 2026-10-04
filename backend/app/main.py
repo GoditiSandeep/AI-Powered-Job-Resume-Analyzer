@@ -1,3 +1,4 @@
+import os
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
@@ -93,6 +94,19 @@ app.include_router(applications_router)
 app.include_router(skills_router)
 app.include_router(admin_router)
 
+# Mount frontend web build if available
+frontend_build_dir = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "frontend",
+    "build",
+    "web"
+)
+
+if os.path.exists(frontend_build_dir):
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/app", StaticFiles(directory=frontend_build_dir, html=True), name="frontend_web")
+    logger.info(f"Mounted Flutter web application at /app from {frontend_build_dir}")
+
 
 @app.get("/")
 def root():
@@ -101,5 +115,6 @@ def root():
         "owner": settings.PROJECT_OWNER,
         "docs": "/docs",
         "health": "/health",
+        "web_app": "/app" if os.path.exists(frontend_build_dir) else None,
         "status": "operational"
     }

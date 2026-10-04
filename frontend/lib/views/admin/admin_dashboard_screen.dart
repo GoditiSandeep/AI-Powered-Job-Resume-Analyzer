@@ -326,6 +326,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
                                   .toList(),
                           ),
                         ),
+                        ),
                         const SizedBox(height: 20),
                         const Text('Top In-Demand Skills in Jobs', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 12),

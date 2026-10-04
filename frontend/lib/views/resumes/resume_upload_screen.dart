@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/routing/route_names.dart';
@@ -35,26 +35,55 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
 
   Future<void> _pickFile() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'docx', 'doc', 'txt'],
         withData: true,
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        setState(() {
-          _selectedFileName = file.name;
-          _selectedFilePath = file.path;
-          _selectedFileBytes = file.bytes;
-          _selectedFileSize = file.size;
-        });
+      if (!mounted || result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      if (file.size > ResumeProvider.maxUploadSizeBytes) {
+        _showFileError('Resume files must be 10 MB or smaller.');
+        return;
       }
+
+      final fileBytes = file.bytes;
+      final filePath = kIsWeb ? null : file.path;
+      final fileSize = fileBytes != null && fileBytes.length > file.size
+          ? fileBytes.length
+          : file.size;
+      if (fileSize > ResumeProvider.maxUploadSizeBytes) {
+        _showFileError('Resume files must be 10 MB or smaller.');
+        return;
+      }
+      if (fileSize == 0 ||
+          (fileBytes != null && fileBytes.isEmpty && filePath == null)) {
+        _showFileError('The selected file is empty. Please choose a valid resume.');
+        return;
+      }
+      if (fileBytes == null && filePath == null) {
+        _showFileError('Could not read the selected file. Please choose it again.');
+        return;
+      }
+
+      setState(() {
+        _selectedFileName = file.name;
+        _selectedFilePath = filePath;
+        _selectedFileBytes = fileBytes?.isNotEmpty == true ? fileBytes : null;
+        _selectedFileSize = fileSize;
+      });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking file: $e'), backgroundColor: AppColors.error),
-      );
+        _showFileError('Unable to access that file. Please try selecting it again.');
     }
+  }
+
+  void _showFileError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.error),
+    );
   }
 
   Future<void> _handleUpload() async {
@@ -77,8 +106,13 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
     String fileName = _selectedFileName ?? 'Resume_Pasted_${DateTime.now().millisecondsSinceEpoch}.txt';
     Uint8List? bytes = _selectedFileBytes;
     if (_isPasteMode) {
-      bytes = Uint8List.fromList(utf8.encode(_textResumeController.text.trim()));
+        bytes = Uint8List.fromList(utf8.encode(_textResumeController.text.trim()));
       fileName = 'Pasted_Resume.txt';
+    }
+
+    if (bytes != null && bytes.length > ResumeProvider.maxUploadSizeBytes) {
+      _showFileError('Resume text must be 10 MB or smaller.');
+      return;
     }
 
     final newResume = await resumeProv.uploadResume(
@@ -100,14 +134,14 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Resume uploaded and analyzed successfully!'), backgroundColor: AppColors.success),
+            const SnackBar(content: Text('Resume uploaded and analyzed successfully!'), backgroundColor: AppColors.success),
         );
         context.go(RouteNames.resumeAnalysis.replaceAll(':id', newResume.id.toString()));
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(resumeProv.errorMessage ?? 'Upload failed. Please try again.'),
+            content: Text(resumeProv.errorMessage ?? 'Upload failed. Please try again.'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -173,12 +207,12 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
                     onTap: resumeProv.isUploading ? null : _pickFile,
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
                       decoration: BoxDecoration(
                         color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: _selectedFileName != null ? AppColors.primary : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                            color: _selectedFileName != null ? AppColors.primary : (isDark ? AppColors.borderDark : AppColors.borderLight),
                           width: 2,
                           style: BorderStyle.solid,
                         ),
@@ -194,7 +228,7 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              _selectedFileName != null ? Icons.check_circle_outline : Icons.cloud_upload_outlined,
+                                _selectedFileName != null ? Icons.check_circle_outline : Icons.cloud_upload_outlined,
                               size: 36,
                               color: AppColors.primary,
                             ),
@@ -212,14 +246,14 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
                                 : 'Supports PDF, DOCX, DOC, and TXT (up to 10MB)',
                             style: TextStyle(
                               fontSize: 13,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                             ),
                           ),
                           if (_selectedFileName != null) ...[
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                               onPressed: _pickFile,
-                              icon: const Icon(Icons.change_circle_outlined, size: 16),
+                                icon: const Icon(Icons.change_circle_outlined, size: 16),
                               label: const Text('Change File'),
                             ),
                           ],
@@ -235,8 +269,8 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
                     decoration: InputDecoration(
                       labelText: 'Paste your raw resume text here',
                       alignLabelWithHint: true,
-                      hintText: 'Work Experience\nSoftware Engineer at Tech Corp (2022 - Present)\n- Built scalable REST APIs in Python FastAPI...',
-                      fillColor: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
+                        hintText: 'Work Experience\nSoftware Engineer at Tech Corp (2022 - Present)\n- Built scalable REST APIs in Python FastAPI...',
+                        fillColor: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
                       filled: true,
                     ),
                   ),
@@ -260,7 +294,7 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
                         const SizedBox(height: 8),
                         Text(
                           'Specify a target role (e.g. Senior Full Stack Developer) for specialized ATS keyword optimization.',
-                          style: TextStyle(fontSize: 12.5, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                            style: TextStyle(fontSize: 12.5, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                         ),
                         const SizedBox(height: 12),
                         TextField(

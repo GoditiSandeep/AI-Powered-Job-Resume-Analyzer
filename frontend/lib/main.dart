@@ -42,14 +42,19 @@ void main() async {
   );
 }
 
-class JobResumeAnalyzerApp extends StatelessWidget {
+class JobResumeAnalyzerApp extends StatefulWidget {
   const JobResumeAnalyzerApp({super.key});
+
+  @override
+  State<JobResumeAnalyzerApp> createState() => _JobResumeAnalyzerAppState();
+}
+
+class _JobResumeAnalyzerAppState extends State<JobResumeAnalyzerApp> {
+  late final router = AppRouter.createRouter(context.read<AuthProvider>());
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    final authProvider = context.watch<AuthProvider>();
-    final router = AppRouter.createRouter(authProvider);
 
     return MaterialApp.router(
       title: 'AI Powered Job & Resume Analyzer',
@@ -59,5 +64,11 @@ class JobResumeAnalyzerApp extends StatelessWidget {
       themeMode: themeProvider.themeMode,
       routerConfig: router,
     );
+  }
+
+  @override
+  void dispose() {
+    router.dispose();
+    super.dispose();
   }
 }
