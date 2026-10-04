@@ -1,0 +1,48 @@
+name: ai_job_resume_analyzer
+description: "AI Powered Job & Resume Analyzer Flutter Cross-Platform Application"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Navigation & Routing
+  go_router: ^14.2.0
+  
+  # State Management
+  provider: ^6.1.2
+  
+  # Networking & REST API
+  dio: ^5.6.0
+  http_parser: ^4.0.2
+  
+  # Local Storage & Security
+  shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.2.2
+  
+  # File Picking & Documents
+  file_picker: ^8.0.7
+  
+  # UI, Icons, Charts & Animations
+  google_fonts: ^6.2.1
+  flutter_spinkit: ^5.2.1
+  fl_chart: ^0.68.0
+  percent_indicator: ^4.2.3
+  intl: ^0.19.0
+  lucide_icons: ^0.257.0
+  cached_network_image: ^3.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
