@@ -302,25 +302,27 @@ def seed_database(db: Session):
         db.commit()
         db.refresh(admin_user)
 
-    # 3. Seed Demo Candidate User
-    demo_email = "demo@analyzer.local"
-    demo_user = db.query(User).filter(User.email == demo_email).first()
-    if not demo_user:
-        logger.info(f"Creating Demo user: Alex Morgan ({demo_email})")
-        demo_user = User(
-            name="Alex Morgan",
-            email=demo_email,
-            username="alex_demo",
-            hashed_password=get_password_hash("DemoUser123!"),
-            role="USER",
-            is_active=True,
-            title="Full Stack Software Engineer",
-            location="Bangalore, India",
-            bio="Passionate full stack developer building AI-powered developer tools.",
-        )
-        db.add(demo_user)
-        db.commit()
-        db.refresh(demo_user)
+    # Development fixtures contain public demo credentials and stay out of production.
+    demo_user = None
+    if settings.ENVIRONMENT.lower() not in {"production", "prod"} and settings.DEMO_USER_PASSWORD:
+        demo_email = "demo@analyzer.local"
+        demo_user = db.query(User).filter(User.email == demo_email).first()
+        if not demo_user:
+            logger.info(f"Creating Demo user: Alex Morgan ({demo_email})")
+            demo_user = User(
+                name="Alex Morgan",
+                email=demo_email,
+                username="alex_demo",
+                hashed_password=get_password_hash(settings.DEMO_USER_PASSWORD),
+                role="USER",
+                is_active=True,
+                title="Full Stack Software Engineer",
+                location="Bangalore, India",
+                bio="Passionate full stack developer building AI-powered developer tools.",
+            )
+            db.add(demo_user)
+            db.commit()
+            db.refresh(demo_user)
 
     # 4. Seed Jobs
     for job_data in INITIAL_JOBS:
@@ -343,7 +345,7 @@ def seed_database(db: Session):
     db.commit()
 
     # 5. Seed Demo Resume for Admin/Demo user if none exists
-    target_user = admin_user or demo_user
+    target_user = (admin_user or demo_user) if settings.ENVIRONMENT.lower() not in {"production", "prod"} else None
     if target_user:
         existing_resume = db.query(Resume).filter(Resume.user_id == target_user.id).first()
         if not existing_resume:

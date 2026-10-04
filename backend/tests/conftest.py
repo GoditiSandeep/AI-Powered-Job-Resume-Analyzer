@@ -16,6 +16,8 @@ os.environ["ENVIRONMENT"] = "test"
 os.environ["DEBUG"] = "False"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["ADMIN_PASSWORD"] = "TestAdminPass2026!"
+os.environ["JWT_SECRET"] = "pytest-only-signing-key-not-for-deployment"
+os.environ["DEMO_USER_PASSWORD"] = "DemoUser123!"
 
 from app.config.settings import settings
 from app.database.base import Base

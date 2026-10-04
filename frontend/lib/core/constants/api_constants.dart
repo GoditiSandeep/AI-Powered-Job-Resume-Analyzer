@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
+
 class ApiConstants {
-  // Base API configuration (Supports web, emulator, and local device)
-  static const String baseUrl = 'http://127.0.0.1:8000';
+  static const String localBaseUrl = 'http://127.0.0.1:8000';
+  static const String configuredBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static String get baseUrl => configuredBaseUrl.isNotEmpty
+      ? configuredBaseUrl
+      : (kIsWeb && kReleaseMode ? Uri.base.origin : localBaseUrl);
   static const String emulatorBaseUrl = 'http://10.0.2.2:8000';
 
   // Endpoints

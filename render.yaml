@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: ai-powered-job-resume-analyzer
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: "[]"
+      - key: MAX_UPLOAD_SIZE_MB
+        value: "10"
+      - key: UPLOAD_DIR
+        value: /tmp/resume-uploads

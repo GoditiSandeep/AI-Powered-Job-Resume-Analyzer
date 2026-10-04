@@ -17,7 +17,10 @@ def run_live_verification():
 
     # 2. Login
     print("\n2. Testing User Authentication (Demo User)...")
-    r = client.post("/api/auth/login", json={"username_or_email": "demo@analyzer.local", "password": "DemoUser123!"})
+    r = client.post("/api/auth/login", json={
+        "username_or_email": os.environ["DEMO_USER_EMAIL"],
+        "password": os.environ["DEMO_USER_PASSWORD"],
+    })
     assert r.status_code == 200, f"Login failed: {r.text}"
     auth_data = r.json()
     token = auth_data["access_token"]
@@ -149,7 +152,10 @@ B.S. in Computer Science | University of Technology (2016 - 2020)
 
     # 11. Admin Dashboard & Analytics
     print("\n11. Testing Admin Dashboard & Analytics (/api/admin/dashboard & /api/admin/analytics)...")
-    r_admin = client.post("/api/auth/login", json={"username_or_email": "admin@analyzer.local", "password": "Admin@Secure2026"})
+    r_admin = client.post("/api/auth/login", json={
+        "username_or_email": os.environ["ADMIN_EMAIL"],
+        "password": os.environ["ADMIN_PASSWORD"],
+    })
     assert r_admin.status_code == 200, f"Admin login failed: {r_admin.text}"
     admin_token = r_admin.json()["access_token"]
     admin_headers = {"Authorization": f"Bearer {admin_token}"}

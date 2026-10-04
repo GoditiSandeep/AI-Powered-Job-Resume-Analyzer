@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/routing/route_names.dart';
@@ -15,8 +16,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController(text: 'admin@analyzer.local');
-  final _passwordController = TextEditingController(text: 'Admin@Secure2026');
+  final _emailController = TextEditingController(
+    text: kDebugMode ? 'admin@analyzer.local' : '',
+  );
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
@@ -149,34 +152,36 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Demo Account Quick Selector Chips
-                      Text(
-                        'Quick Demo Accounts',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      if (kDebugMode) ...[
+                        // Demo Account Quick Selector Chips
+                        Text(
+                          'Quick Demo Accounts',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 8,
-                        children: [
-                          ActionChip(
-                            avatar: const Icon(Icons.admin_panel_settings, size: 16, color: AppColors.primary),
-                            label: const Text('Admin', style: TextStyle(fontSize: 12)),
-                            onPressed: () => _fillCredentials('admin@analyzer.local', 'Admin@Secure2026'),
-                          ),
-                          ActionChip(
-                            avatar: const Icon(Icons.person, size: 16, color: AppColors.secondary),
-                            label: const Text('User Demo', style: TextStyle(fontSize: 12)),
-                            onPressed: () => _fillCredentials('jane.doe@example.com', 'SecurePass2026!'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 8,
+                          children: [
+                            ActionChip(
+                              avatar: const Icon(Icons.admin_panel_settings, size: 16, color: AppColors.primary),
+                              label: const Text('Admin', style: TextStyle(fontSize: 12)),
+                              onPressed: () => _fillCredentials('admin@analyzer.local', ''),
+                            ),
+                            ActionChip(
+                              avatar: const Icon(Icons.person, size: 16, color: AppColors.secondary),
+                              label: const Text('User Demo', style: TextStyle(fontSize: 12)),
+                              onPressed: () => _fillCredentials('demo@analyzer.local', ''),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                      ],
 
                       // Register link
                       Wrap(

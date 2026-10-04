@@ -1,6 +1,6 @@
 import os
-from typing import List, Union
-from pydantic import AnyHttpUrl, field_validator
+from typing import List
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,10 +15,11 @@ class Settings(BaseSettings):
     # Administrator
     ADMIN_USERNAME: str = "Godithi Sandeep"
     ADMIN_EMAIL: str = "admin@analyzer.local"
-    ADMIN_PASSWORD: str = "Admin@Secure2026"
+    ADMIN_PASSWORD: str
+    DEMO_USER_PASSWORD: str | None = None
 
     # JWT
-    JWT_SECRET: str = "super_secret_jwt_key_job_resume_analyzer_2026_change_in_production"
+    JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
@@ -54,6 +55,30 @@ class Settings(BaseSettings):
         case_sensitive=True,
         extra="allow",
     )
+
+    @model_validator(mode="after")
+    def validate_production_configuration(self):
+        if self.ENVIRONMENT.lower() not in {"production", "prod"}:
+            return self
+
+        if self.DEBUG:
+            raise ValueError("DEBUG must be false in production.")
+        if len(self.JWT_SECRET) < 32 or self.JWT_SECRET.startswith("CHANGE_THIS"):
+            raise ValueError("Set JWT_SECRET to a unique random value of at least 32 characters.")
+        if len(self.ADMIN_PASSWORD) < 12 or self.ADMIN_PASSWORD == "CHANGE_THIS_LOCALLY":
+            raise ValueError("Set ADMIN_PASSWORD to a unique password of at least 12 characters.")
+        if self.DEMO_USER_PASSWORD is not None:
+            raise ValueError("Do not configure DEMO_USER_PASSWORD in production.")
+        if self.ADMIN_EMAIL.endswith(".local") or "@" not in self.ADMIN_EMAIL:
+            raise ValueError("Set ADMIN_EMAIL to a real email address in production.")
+        if not self.DATABASE_URL.startswith(("postgres://", "postgresql://", "postgresql+psycopg://")):
+            raise ValueError("Production requires a persistent PostgreSQL DATABASE_URL.")
+        if any(
+            origin == "*" or not origin.startswith("https://")
+            for origin in self.CORS_ORIGINS
+        ):
+            raise ValueError("Production CORS_ORIGINS must contain only trusted HTTPS origins.")
+        return self
 
 
 settings = Settings()

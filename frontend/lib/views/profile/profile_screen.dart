@@ -102,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const Divider(height: 1),
                       ListTile(
                         title: const Text('Backend API Server', style: TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: const Text(ApiConstants.baseUrl),
+                        subtitle: Text(ApiConstants.baseUrl),
                         leading: const Icon(Icons.cloud_outlined, color: AppColors.secondary),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
@@ -114,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 controller: _serverUrlController,
                                 decoration: const InputDecoration(
                                   labelText: 'Base API URL',
-                                  hintText: 'http://127.0.0.1:8000',
+                                  hintText: 'https://your-api.example.com',
                                 ),
                               ),
                               actions: [

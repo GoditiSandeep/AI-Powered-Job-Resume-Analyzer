@@ -3,8 +3,10 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.staticfiles import StaticFiles
 
 from app.config.settings import settings
 from app.database.init_db import init_db
@@ -102,14 +104,27 @@ frontend_build_dir = os.path.join(
     "web"
 )
 
-if os.path.exists(frontend_build_dir):
-    from fastapi.staticfiles import StaticFiles
-    app.mount("/app", StaticFiles(directory=frontend_build_dir, html=True), name="frontend_web")
-    logger.info(f"Mounted Flutter web application at /app from {frontend_build_dir}")
+frontend_index = os.path.join(frontend_build_dir, "index.html")
+
+
+class FlutterStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope):
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code != status.HTTP_404_NOT_FOUND:
+                raise
+            if path == "api" or path.startswith("api/"):
+                raise
+            if os.path.splitext(path.rsplit("/", 1)[-1])[1]:
+                raise
+            return await super().get_response("index.html", scope)
 
 
 @app.get("/")
 def root():
+    if os.path.isfile(frontend_index):
+        return FileResponse(frontend_index)
     return {
         "message": f"Welcome to {settings.PROJECT_NAME} API",
         "owner": settings.PROJECT_OWNER,
@@ -118,3 +133,8 @@ def root():
         "web_app": "/app" if os.path.exists(frontend_build_dir) else None,
         "status": "operational"
     }
+
+
+if os.path.isdir(frontend_build_dir):
+    app.mount("/", FlutterStaticFiles(directory=frontend_build_dir, html=True), name="frontend_web")
+    logger.info(f"Serving Flutter web application from {frontend_build_dir}")

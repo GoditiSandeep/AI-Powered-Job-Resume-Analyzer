@@ -12,7 +12,7 @@ class ApiClient {
 
   ApiClient(this.storageService) {
     String base = ApiConstants.baseUrl;
-    if (!kIsWeb && Platform.isAndroid) {
+    if (!kIsWeb && Platform.isAndroid && ApiConstants.baseUrl == ApiConstants.localBaseUrl) {
       base = ApiConstants.emulatorBaseUrl;
     }
 

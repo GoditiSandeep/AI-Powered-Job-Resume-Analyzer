@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env
+.env.*
+**/.env
+**/.env.*
+backend_venv
+.pytest_cache
+**/__pycache__
+**/*.py[cod]
+backend/uploads
+backend/storage
+frontend/.dart_tool
+frontend/build
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
