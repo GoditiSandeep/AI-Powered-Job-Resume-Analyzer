@@ -6,9 +6,10 @@ The application is configured as one Render Web Service. FastAPI serves the Flut
 
 - FastAPI entry point: `backend/app/main.py`, imported as `app.main:app`.
 - Render Blueprint: `render.yaml`.
-- Docker build: the root `Dockerfile` builds the Flutter release bundle and installs the backend dependencies into one image.
-- Render Build Command: use the Dockerfile build configured by the Blueprint; no separate shell build command is needed.
-- Start Command in the image: `python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}`. The container reads Render's `PORT`.
+- Docker build: the root `Dockerfile` builds the Flutter release bundle, verifies its entry point, JavaScript bootstrap and CanvasKit assets, then installs the backend dependencies into one image.
+- Render Runtime: Docker; Dockerfile Path `./Dockerfile`; Docker Context `.`. Leave Render's separate Build Command and Start Command blank so it builds and runs the configured Dockerfile.
+- Build performed by Docker: `flutter pub get` followed by `flutter build web --release --base-href /`.
+- Start command in the Dockerfile: `sh -c "exec python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"`. The container reads Render's `PORT`.
 - Frontend API origin: release Web builds use `Uri.base.origin`, so requests stay on the public website origin. Debug Web and mobile retain their local development targets.
 
 ## Render Environment

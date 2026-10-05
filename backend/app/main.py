@@ -1,7 +1,8 @@
-import os
 import logging
+import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, status
+from pathlib import Path
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
@@ -97,14 +98,11 @@ app.include_router(skills_router)
 app.include_router(admin_router)
 
 # Mount frontend web build if available
-frontend_build_dir = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "frontend",
-    "build",
-    "web"
+frontend_build_dir = (
+    Path(__file__).resolve().parents[2] / "frontend" / "build" / "web"
 )
 
-frontend_index = os.path.join(frontend_build_dir, "index.html")
+frontend_index = frontend_build_dir / "index.html"
 
 
 class FlutterStaticFiles(StaticFiles):
@@ -123,18 +121,23 @@ class FlutterStaticFiles(StaticFiles):
 
 @app.get("/")
 def root():
-    if os.path.isfile(frontend_index):
+    if frontend_index.is_file():
         return FileResponse(frontend_index)
+    if settings.ENVIRONMENT.lower() in {"production", "prod"}:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Flutter web build is missing from the deployment.",
+        )
     return {
         "message": f"Welcome to {settings.PROJECT_NAME} API",
         "owner": settings.PROJECT_OWNER,
         "docs": "/docs",
         "health": "/health",
-        "web_app": "/app" if os.path.exists(frontend_build_dir) else None,
+        "web_app": "/app" if frontend_build_dir.is_dir() else None,
         "status": "operational"
     }
 
 
-if os.path.isdir(frontend_build_dir):
+if frontend_build_dir.is_dir():
     app.mount("/", FlutterStaticFiles(directory=frontend_build_dir, html=True), name="frontend_web")
     logger.info(f"Serving Flutter web application from {frontend_build_dir}")

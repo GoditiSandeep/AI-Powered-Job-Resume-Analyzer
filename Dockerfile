@@ -8,6 +8,11 @@ RUN flutter pub get
 COPY frontend/ ./
 
 RUN flutter build web --release --base-href /
+RUN test -s build/web/index.html \
+    && test -s build/web/flutter_bootstrap.js \
+    && test -s build/web/main.dart.js \
+    && test -s build/web/canvaskit/canvaskit.js \
+    && test -s build/web/canvaskit/canvaskit.wasm
 
 FROM python:3.12-slim
 
