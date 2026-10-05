@@ -31,7 +31,7 @@ backend/*.db
 backend/uploads/
 backend/storage/
 uploads/
-storage/
+/storage/
 
 # Logs
 *.log

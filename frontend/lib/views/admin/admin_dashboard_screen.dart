@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
-import '../../models/job_model.dart';
-import '../../models/user_model.dart';
 import '../../providers/admin_provider.dart';
 import '../../widgets/app_nav_shell.dart';
 import '../../widgets/custom_button.dart';

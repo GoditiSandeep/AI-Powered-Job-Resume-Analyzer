@@ -14,10 +14,6 @@ class JobProvider extends ChangeNotifier {
   JobModel? _selectedJob;
   JobMatchModel? _currentJobMatch;
 
-  String? _searchQuery;
-  String? _selectedLocation;
-  String? _selectedEmploymentType;
-
   JobProvider(this.apiClient);
 
   bool get isLoading => _isLoading;
@@ -30,9 +26,6 @@ class JobProvider extends ChangeNotifier {
   Future<void> loadJobs({String? search, String? location, String? employmentType}) async {
     _isLoading = true;
     _errorMessage = null;
-    _searchQuery = search;
-    _selectedLocation = location;
-    _selectedEmploymentType = employmentType;
     notifyListeners();
 
     try {
