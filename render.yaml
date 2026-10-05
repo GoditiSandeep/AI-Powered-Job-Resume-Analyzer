@@ -1,10 +1,10 @@
 services:
   - type: web
     name: ai-powered-job-resume-analyzer
-    runtime: docker
+    runtime: python
     plan: free
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    buildCommand: bash render-build.sh
+    startCommand: cd backend && exec python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     autoDeployTrigger: commit
     envVars:

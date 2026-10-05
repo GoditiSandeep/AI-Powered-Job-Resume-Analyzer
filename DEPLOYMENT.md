@@ -6,10 +6,10 @@ The application is configured as one Render Web Service. FastAPI serves the Flut
 
 - FastAPI entry point: `backend/app/main.py`, imported as `app.main:app`.
 - Render Blueprint: `render.yaml`.
-- Docker build: the root `Dockerfile` builds the Flutter release bundle, verifies its entry point, JavaScript bootstrap and CanvasKit assets, then installs the backend dependencies into one image.
-- Render Runtime: Docker; Dockerfile Path `./Dockerfile`; Docker Context `.`. Leave Render's separate Build Command and Start Command blank so it builds and runs the configured Dockerfile.
-- Build performed by Docker: `flutter pub get` followed by `flutter build web --release --base-href /`.
-- Start command in the Dockerfile: `sh -c "exec python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"`. The container reads Render's `PORT`.
+- Render Runtime: Python 3, with the repository root as the Root Directory.
+- Render Build Command: `bash render-build.sh`. This installs backend dependencies, fetches the stable Flutter SDK when needed, builds the Flutter release bundle, and verifies the entry point, JavaScript bootstrap and CanvasKit assets.
+- Render Start Command: `cd backend && exec python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+- The root `Dockerfile` remains available for Docker deployments; it also builds Flutter and checks that the generated web assets are included in its image.
 - Frontend API origin: release Web builds use `Uri.base.origin`, so requests stay on the public website origin. Debug Web and mobile retain their local development targets.
 
 ## Render Environment
@@ -33,11 +33,11 @@ For local development, copy `backend/.env.example` to `backend/.env` and replace
 
 ## Deploy
 
-1. Push the deployment changes to the existing `main` branch.
+1. Push the deployment changes to the existing `main` branch; Render auto-deploys commits from that branch.
 2. Create a Supabase project. Open **Connect**, choose the **Session pooler** URI, and keep its database password private.
 3. Sign in to Render, select **New > Blueprint**, authorize GitHub, and choose this repository.
 4. In the Blueprint prompt, enter `ADMIN_USERNAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`; paste the Supabase connection string into `DATABASE_URL`. Render generates `JWT_SECRET`.
-5. Wait for the service to report **Live**. Its one public URL will be `https://<render-service>.onrender.com`. Use that same URL for the website, API, and technical docs at `/docs`.
+5. Wait for the service to report **Live**. Use the same `https://<render-service>.onrender.com` URL for the Flutter website, API, and technical docs at `/docs`.
 
 Production settings reject debug mode, SQLite, placeholder credentials, `.local` admin emails, and wildcard/non-HTTPS CORS origins. Demo accounts and the demo resume are not seeded in production.
 
